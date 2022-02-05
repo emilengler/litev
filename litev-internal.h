@@ -1,6 +1,13 @@
 #ifndef LITEV_INTERNAL_H
 #define LITEV_INTERNAL_H
 
+/* Detect the kernel notification API to be used. */
+#if defined(_FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#define USE_KQUEUE
+#else
+#error "only kqueue(2) is supported at the moment."
+#endif
+
 /* Opaque pointer that holds the data for a kernel notification API. */
 typedef void EV_API_DATA;
 
