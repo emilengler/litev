@@ -3,7 +3,8 @@
 CFLAGS	+= -g -W -Wall -Wextra -Wpedantic -Wmissing-prototypes
 CFLAGS	+= -Wstrict-prototypes -Wwrite-strings -Wno-unused-parameter
 
-OBJS	 = litev.o
+OBJS	 = litev.o	\
+	   kqueue.o
 
 all: libitev.a
 

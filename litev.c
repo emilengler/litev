@@ -4,6 +4,7 @@
 
 #include "litev.h"
 #include "litev-internal.h"
+#include "ev_api.h"
 
 struct litev_base *
 litev_init(void)
@@ -13,7 +14,10 @@ litev_init(void)
 	if ((base = malloc(sizeof(struct litev_base))) == NULL)
 		return (NULL);
 
-	/* TODO: Initialize ev_api with the appropriate backend. */
+#ifdef USE_KQUEUE
+	ev_api_kqueue(&base->ev_api);
+#endif
+
 	if ((base->ev_api_data = base->ev_api.init()) == NULL) {
 		free(base);
 		return (NULL);
