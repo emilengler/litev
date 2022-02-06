@@ -11,6 +11,16 @@ extern "C" {
 struct litev_base;
 struct litev_ev;
 
+enum {
+	LITEV_OK = 0,
+	LITEV_ENOENT,
+	LITEV_EBUSY,
+	LITEV_EINVAL,
+	LITEV_EAGAIN,
+	LITEV_EALREADY,
+	LITEV_EOVERFLOW
+};
+
 struct litev_ev {
 	int	  fd;
 	short	  condition;

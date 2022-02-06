@@ -11,17 +11,6 @@
 /* Opaque pointer that holds the data for a kernel notification API. */
 typedef void EV_API_DATA;
 
-/* Internal error codes. */
-enum litev_err {
-	LITEV_OK = 0,
-	LITEV_ENOENT,
-	LITEV_EBUSY,
-	LITEV_EINVAL,
-	LITEV_EAGAIN,
-	LITEV_EALREADY,
-	LITEV_EOVERFLOW
-};
-
 /* Structure to define the backend of a kernel event notification API. */
 struct litev_ev_api {
 	EV_API_DATA	*(*init)(void);
