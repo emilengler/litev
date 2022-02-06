@@ -14,7 +14,7 @@ struct litev_ev;
 struct litev_ev {
 	int	  fd;
 	short	  condition;
-	void	(*cb)(struct litev_base *, int, short, void *);
+	void	(*cb)(int, short, void *);
 	void	 *udata;
 };
 
