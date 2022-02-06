@@ -27,7 +27,7 @@ struct litev_ev_api {
 	EV_API_DATA	*(*init)(void);
 	void		 (*free)(EV_API_DATA *);
 
-	int		 (*poll)(struct litev_base *);
+	int		 (*poll)(EV_API_DATA *);
 
 	int		 (*add)(EV_API_DATA *, struct litev_ev *);
 	int		 (*del)(EV_API_DATA *, struct litev_ev *);

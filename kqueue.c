@@ -47,7 +47,7 @@ static short		 kqueue_filter(short);
 static int		 kqueue_grow(struct kqueue_data *);
 static EV_API_DATA	*kqueue_init(void);
 static void		 kqueue_free(EV_API_DATA *);
-static int		 kqueue_poll(struct litev_base *);
+static int		 kqueue_poll(EV_API_DATA *);
 static int		 kqueue_add(EV_API_DATA *, struct litev_ev *);
 static int		 kqueue_del(EV_API_DATA *, struct litev_ev *);
 
@@ -190,13 +190,13 @@ kqueue_free(EV_API_DATA *raw_data)
 }
 
 static int
-kqueue_poll(struct litev_base *base)
+kqueue_poll(EV_API_DATA *raw_data)
 {
 	struct kqueue_data	*data;
 	struct udata_node	*node;
 	int			 nready, i;
 
-	data = base->ev_api_data;
+	data = raw_data;
 
 	nready = kevent(data->kq, NULL, 0, data->ev, data->nev, NULL);
 	if (nready == -1 && errno != EINTR)
@@ -204,8 +204,7 @@ kqueue_poll(struct litev_base *base)
 
 	for (i = 0; i < nready; ++i) {
 		node = data->ev[i].udata;
-		node->ev.cb(base, node->ev.fd, node->ev.condition,
-			    node->ev.udata);
+		node->ev.cb(node->ev.fd, node->ev.condition, node->ev.udata);
 	}
 
 	return (LITEV_OK);
