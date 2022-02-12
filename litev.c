@@ -52,6 +52,7 @@ litev_dispatch(struct litev_base *base)
 	if (base->is_dispatched)
 		return (LITEV_EBUSY);
 
+	base->is_dispatched = 1;
 	while (!base->is_quitting) {
 		if ((rc = base->ev_api.poll(base->ev_api_data)) != LITEV_OK)
 			return (rc);
