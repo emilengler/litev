@@ -91,19 +91,7 @@ client_cb(int c, short condition, void *unused)
 	if (n == -1 && errno != EAGAIN)
 		err(1, "recv");
 	else if (n == 0) {	/* Client closed the connection. */
-		/* Remove the file descriptor from the event loop. */
-		ev.fd = c;
-		ev.condition = LITEV_READ;
-		/*
-		 * cb and udata do not need to be initialized in order to
-		 * identify the event for removal.
-		 */
-		ev.cb = NULL;
-		ev.udata = NULL;
-
-		if (litev_del(base, &ev) != LITEV_OK)
-			errx(1, "litev_del");
-		close(c);
+		litev_close(base, c);
 	} else
 		send(c, buf, 129, 0);
 }
