@@ -36,6 +36,7 @@ struct litev_ev_api {
 
 	int		 (*add)(EV_API_DATA *, struct litev_ev *);
 	int		 (*del)(EV_API_DATA *, struct litev_ev *);
+	int		 (*close)(EV_API_DATA *, int);
 };
 
 struct litev_base {
