@@ -70,6 +70,7 @@ static void		 kqueue_free(EV_API_DATA *);
 static int		 kqueue_poll(EV_API_DATA *);
 static int		 kqueue_add(EV_API_DATA *, struct litev_ev *);
 static int		 kqueue_del(EV_API_DATA *, struct litev_ev *);
+static int		 kqueue_close(EV_API_DATA *, int);
 
 static short
 condition2filter(short condition)
@@ -322,6 +323,28 @@ kqueue_del(EV_API_DATA *raw_data, struct litev_ev *ev)
 	return (LITEV_OK);
 }
 
+static int
+kqueue_close(EV_API_DATA *raw_data, int fd)
+{
+	struct kqueue_data	*data;
+	struct hash_node	*ev_read, *ev_write;
+	struct litev_ev		 ev;
+
+	data = raw_data;
+	ev.fd = fd;
+
+	/* Fetch all events that contain fd. */
+	ev.condition = LITEV_READ;
+	if ((ev_read = hash_lookup(data->hash, &ev)) != NULL)
+		hash_del(data->hash, ev_read);
+	ev.condition = LITEV_WRITE;
+	if ((ev_write = hash_lookup(data->hash, &ev)) != NULL)
+		hash_del(data->hash, ev_write);
+
+	/* Closing a fd removes all registered events from kqueue(2). */
+	return (close(fd) == 0 ? LITEV_OK : -1);
+}
+
 void
 ev_api_kqueue(struct litev_ev_api *ev_api)
 {
@@ -330,4 +353,5 @@ ev_api_kqueue(struct litev_ev_api *ev_api)
 	ev_api->poll = kqueue_poll;
 	ev_api->add = kqueue_add;
 	ev_api->del = kqueue_del;
+	ev_api->close = kqueue_close;
 }

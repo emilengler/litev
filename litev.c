@@ -116,3 +116,12 @@ litev_del(struct litev_base *base, struct litev_ev *ev)
 
 	return (base->ev_api.del(base->ev_api_data, ev));
 }
+
+int
+litev_close(struct litev_base *base, int fd)
+{
+	if (base == NULL || fd < 0)
+		return (LITEV_EINVAL);
+
+	return (base->ev_api.close(base->ev_api_data, fd));
+}

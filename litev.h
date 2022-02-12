@@ -53,6 +53,7 @@ int			 litev_break(struct litev_base *);
 
 int			 litev_add(struct litev_base *, struct litev_ev *);
 int			 litev_del(struct litev_base *, struct litev_ev *);
+int			 litev_close(struct litev_base *, int);
 
 #ifdef __cplusplus
 }
