@@ -34,6 +34,8 @@
 
 #define HASH(x)	(x % NHASH)
 
+#ifdef USE_KQUEUE
+
 /*
  * When an event gets added, litev copies the struct litev_ev onto the heap,
  * so that the caller process does not need to keep its data around.
@@ -355,3 +357,9 @@ ev_api_kqueue(struct litev_ev_api *ev_api)
 	ev_api->del = kqueue_del;
 	ev_api->close = kqueue_close;
 }
+
+#else
+
+int	kqueue_dummy;
+
+#endif
