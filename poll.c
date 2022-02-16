@@ -14,37 +14,28 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef LITEV_INTERNAL_H
-#define LITEV_INTERNAL_H
+#include <sys/types.h>
 
-/* Detect the kernel notification API to be used. */
-#if defined(_FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
-#define USE_KQUEUE
+#include <stdlib.h>
+
+#include "litev.h"
+#include "litev-internal.h"
+#include "ev_api.h"
+
+#ifdef USE_POLL
+
+void
+ev_api_poll(struct litev_ev_api *ev_api)
+{
+	ev_api->init = NULL;
+	ev_api->free = NULL;
+	ev_api->poll = NULL;
+	ev_api->add = NULL;
+	ev_api->del = NULL;
+}
+
 #else
-#define USE_POLL
-#endif
 
-/* Opaque pointer that holds the data for a kernel notification API. */
-typedef void EV_API_DATA;
-
-/* Structure to define the backend of a kernel event notification API. */
-struct litev_ev_api {
-	EV_API_DATA	*(*init)(void);
-	void		 (*free)(EV_API_DATA *);
-
-	int		 (*poll)(EV_API_DATA *);
-
-	int		 (*add)(EV_API_DATA *, struct litev_ev *);
-	int		 (*del)(EV_API_DATA *, struct litev_ev *);
-	int		 (*close)(EV_API_DATA *, int);
-};
-
-struct litev_base {
-	EV_API_DATA		*ev_api_data;
-	struct litev_ev_api	 ev_api;
-
-	int			 is_dispatched;
-	int			 is_quitting;
-};
+int	poll_dummy;
 
 #endif

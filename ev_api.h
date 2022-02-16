@@ -17,8 +17,10 @@
 #ifndef EV_API_H
 #define EV_API_H
 
-#ifdef USE_KQUEUE
+#if defined(USE_KQUEUE)
 void	ev_api_kqueue(struct litev_ev_api *);
+#elif defined(USE_POLL)
+void	ev_api_poll(struct litev_ev_api *);
 #endif
 
 #endif
