@@ -30,8 +30,10 @@ litev_init(void)
 	if ((base = malloc(sizeof(struct litev_base))) == NULL)
 		return (NULL);
 
-#ifdef USE_KQUEUE
+#if defined(USE_KQUEUE)
 	ev_api_kqueue(&base->ev_api);
+#elif defined(USE_POLL)
+	ev_api_poll(&base->ev_api);
 #endif
 
 	if ((base->ev_api_data = base->ev_api.init()) == NULL) {
