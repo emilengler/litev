@@ -14,6 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "config.h"
+
+#ifdef USE_KQUEUE
+
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
@@ -33,8 +37,6 @@
 #define NHASH	1024
 
 #define HASH(x)	(x % NHASH)
-
-#ifdef USE_KQUEUE
 
 /*
  * When an event gets added, litev copies the struct litev_ev onto the heap,
