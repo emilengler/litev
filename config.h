@@ -17,7 +17,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-/* Detect the kernel notification API to be used. */
+/* Detect the kernel event notification API to be used. */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #define USE_KQUEUE
 #else
