@@ -14,30 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#ifdef USE_POLL
-
-#include <sys/types.h>
-
-#include <stdlib.h>
-
-#include "litev.h"
-#include "litev-internal.h"
-#include "ev_api.h"
-
-void
-ev_api_poll(struct litev_ev_api *ev_api)
-{
-	ev_api->init = NULL;
-	ev_api->free = NULL;
-	ev_api->poll = NULL;
-	ev_api->add = NULL;
-	ev_api->del = NULL;
-}
-
+/* Detect the kernel notification API to be used. */
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#define USE_KQUEUE
 #else
-
-int	poll_dummy;
+#define USE_POLL
+#endif
 
 #endif
