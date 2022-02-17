@@ -5,6 +5,7 @@ CFLAGS	+= -Wstrict-prototypes -Wwrite-strings -Wno-unused-parameter
 
 OBJS	 = litev.o	\
 	   kqueue.o	\
+	   epoll.o	\
 	   poll.o
 
 all: libitev.a

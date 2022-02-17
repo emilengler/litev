@@ -14,15 +14,33 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef EV_API_H
-#define EV_API_H
+#include "config.h"
 
-#if defined(USE_KQUEUE)
-void	ev_api_kqueue(struct litev_ev_api *);
-#elif defined(USE_EPOLL)
-void	ev_api_epoll(struct litev_ev_api *);
-#elif defined(USE_POLL)
-void	ev_api_poll(struct litev_ev_api *);
-#endif
+#ifdef USE_EPOLL
+
+#include <sys/types.h>
+#include <sys/epoll.h>
+
+#include <stdlib.h>
+#include <unistd.h>
+
+#include "litev.h"
+#include "litev-internal.h"
+#include "ev_api.h"
+
+void
+ev_api_epoll(struct litev_ev_api *ev_api)
+{
+	ev_api->init = NULL;
+	ev_api->free = NULL;
+	ev_api->poll = NULL;
+	ev_api->add = NULL;
+	ev_api->del = NULL;
+	ev_api->close = NULL;
+}
+
+#else
+
+int	epoll_dummy;
 
 #endif
