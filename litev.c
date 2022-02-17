@@ -34,6 +34,8 @@ litev_init(void)
 
 #if defined(USE_KQUEUE)
 	ev_api_kqueue(&base->ev_api);
+#elif defined(USE_EPOLL)
+	ev_api_epoll(&base->ev_api);
 #elif defined(USE_POLL)
 	ev_api_poll(&base->ev_api);
 #endif

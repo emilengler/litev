@@ -20,6 +20,8 @@
 /* Detect the kernel event notification API to be used. */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #define USE_KQUEUE
+#elif defined(__linux__)
+#define USE_EPOLL
 #else
 #define USE_POLL
 #endif
