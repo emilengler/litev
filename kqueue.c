@@ -94,9 +94,9 @@ static int
 hash_add(struct hash_node *hash[], struct litev_ev *ev)
 {
 	struct hash_node	*node;
-	int			 index;
+	int			 slot;
 
-	index = HASH(ev->fd);
+	slot = HASH(ev->fd);
 
 	if ((node = malloc(sizeof(struct hash_node))) == NULL)
 		return (-1);
@@ -105,10 +105,10 @@ hash_add(struct hash_node *hash[], struct litev_ev *ev)
 
 	/* Insert the new node at the beginning of the linked list. */
 	node->prev = NULL;
-	node->next = hash[index];
+	node->next = hash[slot];
 	if (node->next != NULL)
 		node->next->prev = node;
-	hash[index] = node;
+	hash[slot] = node;
 
 	return (LITEV_OK);
 }
@@ -116,15 +116,15 @@ hash_add(struct hash_node *hash[], struct litev_ev *ev)
 static void
 hash_del(struct hash_node *hash[], struct hash_node *node)
 {
-	int index;
+	int slot;
 
-	index = HASH(node->ev.fd);
+	slot = HASH(node->ev.fd);
 
 	/* node is the head node. */
 	if (node->prev == NULL) {
 		if (node->next != NULL)
 			node->next->prev = NULL;
-		hash[index] = node->next;
+		hash[slot] = node->next;
 	} else {
 		if (node->next != NULL)
 			node->next->prev = node->prev;
