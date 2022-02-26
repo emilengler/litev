@@ -220,7 +220,7 @@ poll_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 
 	/* Check if the event is already registered. */
 	if (poll_find_ev(data, ev) != data->npfd)
-		return (LITEV_EEXISTS);
+		return (LITEV_EEXIST);
 
 	/* Check if we need to allocate more space for events. */
 	if ((slot = poll_find_free(data)) == data->npfd) {
