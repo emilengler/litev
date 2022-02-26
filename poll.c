@@ -39,7 +39,7 @@
  * pfd_ev shares the indices with pfd, so the look-ups for the appropriate
  * callbacks with their udata are O(1).
  *
- * TODO: Add a hash map, so that removals are O(1).
+ * TODO: Add a hash table, so that removals are O(1).
  */
 struct poll_data {
 	struct pollfd	*pfd;

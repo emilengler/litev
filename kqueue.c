@@ -32,41 +32,19 @@
 #include "litev.h"
 #include "litev-internal.h"
 #include "ev_api.h"
+#include "hash.h"
 
 #define GROW	128
-#define NHASH	1024
-
-#define HASH(x)	(x % NHASH)
-
-/*
- * When an event gets added, litev copies the struct litev_ev onto the heap,
- * so that the caller process does not need to keep its data around.
- * However, this also requires us to keep track of our allocations, so we do
- * not leak memory when events get removed or the event loop is free'd
- * entirely.
- * To get around this problem, we will use a hash map with a pair of the FD
- * and the condition as its identifier.
- */
-struct hash_node {
-	struct hash_node	*prev;
-	struct hash_node	*next;
-	struct litev_ev		 ev;
-};
 
 struct kqueue_data {
-	struct hash_node	**hash;
-	struct kevent		 *ev;
-	size_t			  nev;
-	size_t			  nactive_ev;
-	int			  kq;
+	struct hash	**hash;
+	struct kevent	 *ev;
+	size_t		  nev;
+	size_t		  nactive_ev;
+	int		  kq;
 };
 
 static short		 condition2filter(short);
-
-static int		 hash_add(struct hash_node *[], struct litev_ev *);
-static void		 hash_del(struct hash_node *[], struct hash_node *);
-static void		 hash_free(struct hash_node *[]);
-static struct hash_node	*hash_lookup(struct hash_node *[], struct litev_ev *);
 
 static int		 kqueue_grow(struct kqueue_data *);
 static EV_API_DATA	*kqueue_init(void);
@@ -88,80 +66,6 @@ condition2filter(short condition)
 
 	assert(0);
 	return (0);
-}
-
-static int
-hash_add(struct hash_node *hash[], struct litev_ev *ev)
-{
-	struct hash_node	*node;
-	int			 slot;
-
-	slot = HASH(ev->fd);
-
-	if ((node = malloc(sizeof(struct hash_node))) == NULL)
-		return (-1);
-
-	memcpy(&node->ev, ev, sizeof(struct litev_ev));
-
-	/* Insert the new node at the beginning of the linked list. */
-	node->prev = NULL;
-	node->next = hash[slot];
-	if (node->next != NULL)
-		node->next->prev = node;
-	hash[slot] = node;
-
-	return (LITEV_OK);
-}
-
-static void
-hash_del(struct hash_node *hash[], struct hash_node *node)
-{
-	int slot;
-
-	slot = HASH(node->ev.fd);
-
-	/* node is the head node. */
-	if (node->prev == NULL) {
-		if (node->next != NULL)
-			node->next->prev = NULL;
-		hash[slot] = node->next;
-	} else {
-		if (node->next != NULL)
-			node->next->prev = node->prev;
-		node->prev->next = node->next;
-	}
-	free(node);
-}
-
-static void
-hash_free(struct hash_node *hash[])
-{
-	struct hash_node	*tmp;
-	int			 i;
-
-	for (i = 0; i < NHASH; ++i) {
-		while (hash[i] != NULL) {
-			tmp = hash[i];
-			hash[i] = hash[i]->next;
-			free(tmp);
-		}
-	}
-
-	free(hash);
-}
-
-static struct hash_node *
-hash_lookup(struct hash_node *hash[], struct litev_ev *ev)
-{
-	struct hash_node	*node;
-
-	for (node = hash[HASH(ev->fd)]; node != NULL; node = node->next) {
-		if (node->ev.fd == ev->fd &&
-		    node->ev.condition == ev->condition)
-			break;
-	}
-
-	return (node);
 }
 
 static int
@@ -198,9 +102,8 @@ kqueue_init(void)
 	if ((data = malloc(sizeof(struct kqueue_data))) == NULL)
 		return (NULL);
 
-	if ((data->hash = malloc(sizeof(struct hash_node *) * NHASH)) == NULL)
+	if ((data->hash = hash_init()) == NULL)
 		goto err;
-	memset(data->hash, 0, sizeof(struct hash_node *) * NHASH);
 
 	if ((data->kq = kqueue()) == -1)
 		goto err;
@@ -211,7 +114,7 @@ kqueue_init(void)
 
 	return (data);
 err:
-	free(data->hash);
+	hash_free(&data->hash);
 	free(data);
 	return (NULL);
 }
@@ -223,7 +126,7 @@ kqueue_free(EV_API_DATA *raw_data)
 
 	data = raw_data;
 
-	hash_free(data->hash);
+	hash_free(&data->hash);
 
 	free(data->ev);
 	close(data->kq);
@@ -247,9 +150,9 @@ kqueue_poll(EV_API_DATA *raw_data)
 	for (i = 0; i < nready; ++i) {
 		/*
 		 * Because kqueue(2)s udata field is set to the
-		 * struct litev_ev of the appropriate hash map entry, we do
+		 * struct litev_ev of the appropriate hash table entry, we do
 		 * not need to perform an additional lookup inside the hash
-		 * map.
+		 * table.
 		 */
 		ev = data->ev[i].udata;
 		ev->cb(ev->fd, ev->condition, ev->udata);
@@ -262,7 +165,7 @@ static int
 kqueue_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 {
 	struct kqueue_data	*data;
-	struct hash_node	*node;
+	struct hash		*node;
 	struct kevent		 kev;
 	short			 filter;
 	int			 rc;
@@ -277,7 +180,7 @@ kqueue_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 	if ((rc = kqueue_grow(data)) != LITEV_OK)
 		return (rc);
 
-	/* Add the event to the hash map. */
+	/* Add the event to the hash table. */
 	if ((rc = hash_add(data->hash, ev)) != LITEV_OK)
 		return (rc);
 
@@ -291,6 +194,7 @@ kqueue_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 
 	/* Add the event to kqueue(2). */
 	if (kevent(data->kq, &kev, 1, NULL, 0, NULL) == -1) {
+		/* Failure during event registration. */
 		hash_del(data->hash, node);
 		return (-1);
 	}
@@ -303,7 +207,7 @@ static int
 kqueue_del(EV_API_DATA *raw_data, struct litev_ev *ev)
 {
 	struct kqueue_data	*data;
-	struct hash_node	*node;
+	struct hash		*node;
 	struct kevent		 kev;
 	short			 filter;
 
@@ -331,7 +235,7 @@ static int
 kqueue_close(EV_API_DATA *raw_data, int fd)
 {
 	struct kqueue_data	*data;
-	struct hash_node	*ev_read, *ev_write;
+	struct hash		*ev_read, *ev_write;
 	struct litev_ev		 ev;
 
 	data = raw_data;
