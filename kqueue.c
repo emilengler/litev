@@ -173,7 +173,7 @@ kqueue_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 
 	/* Check if the event is already registered. */
 	if (hash_lookup(data->hash, ev) != NULL)
-		return (LITEV_EEXISTS);
+		return (LITEV_EEXIST);
 
 	/* Grow data->ev, if required. */
 	if ((rc = kqueue_grow(data)) != LITEV_OK)

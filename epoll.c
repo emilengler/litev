@@ -207,7 +207,7 @@ epoll_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 
 	/* Check if the event is already registered. */
 	if (hash_lookup(data->hash, ev) != NULL)
-		return (LITEV_EEXISTS);
+		return (LITEV_EEXIST);
 
 	/* Grow data->ev, if required. */
 	if ((rc = epoll_grow(data)) != LITEV_OK)
@@ -221,7 +221,7 @@ epoll_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 	 * registered a FD with LITEV_READ and now wants to register the
 	 * same FD with the LITEV_WRITE condition.  What litev will do,
 	 * is try to add the FD with EPOLLOUT through EPOLL_CTL_ADD.
-	 * If this fails with EEXISTS, litev will use EPOLL_CTL_MOD and
+	 * If this fails with EEXIST, litev will use EPOLL_CTL_MOD and
 	 * OR the event with LITEV_READ.
 	 * This approach makes it hard to add more conditions and should
 	 * be replaced by a better solution, once found.
