@@ -4,6 +4,7 @@ CFLAGS	+= -g -W -Wall -Wextra -Wpedantic -Wmissing-prototypes
 CFLAGS	+= -Wstrict-prototypes -Wwrite-strings -Wno-unused-parameter
 
 OBJS	 = litev.o	\
+	   hash.o	\
 	   kqueue.o	\
 	   epoll.o	\
 	   poll.o
