@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-CFLAGS	+= -g -W -Wall -Wextra -Wpedantic -Wmissing-prototypes
+CFLAGS	+= -std=c99 -g -W -Wall -Wextra -Wpedantic -Wmissing-prototypes
 CFLAGS	+= -Wstrict-prototypes -Wwrite-strings -Wno-unused-parameter
 
 OBJS	 = litev.o	\
