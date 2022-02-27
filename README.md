@@ -10,4 +10,4 @@ Therefore I do not encourage you to use this in a productive environment.
 ## License
 
 All sources use the ISC (like OpenBSD) license.
-See the [LICENSE](LICENSE.md) file for details.
+See the [LICENSE](LICENSE) file for details.
