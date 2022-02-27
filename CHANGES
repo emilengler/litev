@@ -1,3 +1,17 @@
+0.3 (2022-02-27)
+----------------
+External changes:
+- Support for epoll(2)
+- Rename LITEV_EEXISTS to LITEV_EEXIST.
+- Stick to C99.
+- Convert README to markdown.
+- New example: bare-bones.c
+
+Internal changes:
+- Better variable naming.
+- Move kqueue(2)s hash table into its own file hash.c.
+- Some #include refactoring.
+
 0.2 (2022-02-17)
 ----------------
 - Support for poll(2).
