@@ -44,6 +44,12 @@ struct poll_data {
 	struct pollfd	*pfd;
 	struct litev_ev	*pfd_ev;
 	size_t		 npfd;
+
+	/*
+	 * This member fields serves the only purpose to know if events have
+	 * been registered yet.  Its value is meaningless except if zero.
+	 */
+	size_t		 nactive_ev;
 };
 
 static short		 condition2event(short);
@@ -166,6 +172,7 @@ poll_init(void)
 	data->pfd = NULL;
 	data->pfd_ev = NULL;
 	data->npfd = 0;
+	data->nactive_ev = 0;
 
 	return (data);
 }
@@ -191,6 +198,10 @@ poll_poll(EV_API_DATA *raw_data)
 	short			 revent;
 
 	data = raw_data;
+
+	/* Return immediately, if no events have been registered yet. */
+	if (data->nactive_ev == 0)
+		return (LITEV_OK);
 
 	if (poll(data->pfd, data->npfd, -1) == -1 && errno != EINTR)
 		return (-1);
@@ -232,6 +243,8 @@ poll_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 	data->pfd[slot].revents = 0;
 	memcpy(&data->pfd_ev[slot], ev, sizeof(struct litev_ev));
 
+	++data->nactive_ev;
+
 	return (LITEV_OK);
 }
 
@@ -253,6 +266,8 @@ poll_del(EV_API_DATA *raw_data, struct litev_ev *ev)
 	data->pfd[slot].revents = 0;
 	data->pfd_ev[slot].fd = -1;
 	data->pfd_ev[slot].condition = 0;
+
+	--data->nactive_ev;
 
 	return (LITEV_OK);
 }
