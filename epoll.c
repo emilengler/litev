@@ -209,7 +209,10 @@ epoll_add(EV_API_DATA *raw_data, struct litev_ev *ev)
 	if (hash_lookup(data->hash, ev) != NULL)
 		return (LITEV_EEXIST);
 
-	/* Grow data->ev, if required. */
+	/*
+	 * Grow data->ev, if required.  This step must be done, before
+	 * nactive_ev is being incremented!
+	 */
 	if ((rc = epoll_grow(data)) != LITEV_OK)
 		return (rc);
 
