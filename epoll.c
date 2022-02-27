@@ -258,6 +258,45 @@ err:
 static int
 epoll_del(EV_API_DATA *raw_data, struct litev_ev *ev)
 {
+	struct epoll_api_data	*data;
+	struct hash		*node;
+	struct epoll_event	 eev;
+	struct litev_ev		 tev;
+
+	data = raw_data;
+	eev.data.fd = ev->fd;
+	tev.fd = ev->fd;
+
+	/*
+	 * Because epoll(2) works on a per-FD basis, rather than on a
+	 * per-event basis, we have to use a very dirty hack here in
+	 * order to remove events.
+	 * It works as follows: Suppose that the application has already
+	 * registered two events with the same FD but with two different
+	 * conditions (LITEV_READ | LITEV_WRITE).  Now the application
+	 * wants to remove the event with the LITEV_WRITE condition.
+	 * litev will then remove the entire epoll(2) event and then
+	 * add it again but with recalculated events from the hash table.
+	 */
+
+	/* Check if the event is even registered. */
+	if ((node = hash_lookup(data->hash, ev)) == NULL)
+		return (LITEV_ENOENT);
+
+	if (epoll_ctl(data->epfd, EPOLL_CTL_DEL, ev->fd, &eev) == -1)
+		return (-1);
+	hash_del(data->hash, node);
+	--data->nactive_ev;
+
+	/* Recalculate the epoll(2) events bitmask from the removed event. */
+	/* TODO: Put this into some sort of if/else branching to reduce CPU. */
+	tev.condition = LITEV_READ;
+	if (hash_lookup(data->hash, &tev) != NULL)
+		eev.events = EPOLLIN;
+	tev.condition = LITEV_WRITE;
+	if (hash_lookup(data->hash, &tev) != NULL)
+		eev.events = EPOLLOUT;
+
 	return (LITEV_OK);
 }
 
