@@ -169,12 +169,9 @@ epoll_poll(EV_API_DATA *raw_data)
 
 	data = raw_data;
 
-	/* data is not yet "ready" for epoll_wait(2). */
-	if (data->nactive_ev == 0 || data->ev == NULL)
-		return (LITEV_OK);
-
 	nready = epoll_wait(data->epfd, data->ev, data->nactive_ev, -1);
-	if (nready == -1 && errno != EINTR)
+	if (nready == -1 &&
+	    !(errno == EFAULT || errno == EINTR || errno == EINVAL))
 		return (-1);
 
 	for (i = 0; i < nready; ++i) {
