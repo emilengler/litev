@@ -11,4 +11,4 @@ clean:
 	rm -f perf.o ${BINS}
 
 libevent: libevent.c
-	${CC} ${CFLAGS} -O2 -o $@ perf.o libevent.c -levent
+	${CC} ${CFLAGS} -o $@ perf.o libevent.c -levent
