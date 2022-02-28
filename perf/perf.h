@@ -22,4 +22,6 @@
 			"\r\n"				\
 			"Hello, world!"
 
+int			perf_socket(void);
+
 #endif

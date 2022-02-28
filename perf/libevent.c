@@ -17,11 +17,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <netinet/in.h>
-
 #include <err.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -32,7 +29,6 @@
 
 static void	accept_cb(int, short, void *);
 static void	client_cb(int, short, void *);
-static int	create_socket(void);
 
 static void
 accept_cb(int s, short condition, void *udata)
@@ -64,44 +60,13 @@ client_cb(int c, short condition, void *ev)
 	free(ev);
 }
 
-static int
-create_socket(void)
-{
-	struct sockaddr_in	sa;
-	int			s, flags;
-
-	/* Create the socket. */
-	if ((s = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-		err(1, "socket");
-
-	/* Set the socket non-blocking. */
-	if ((flags = fcntl(s, F_GETFL)) == -1)
-		err(1, "fcntl F_GETFL");
-	if (fcntl(s, F_SETFL, flags | O_NONBLOCK) == -1)
-		err(1, "fcntl F_SETFL");
-
-	/* Bind the socket to port 8080. */
-	memset(&sa, 0, sizeof(struct sockaddr_in));
-	sa.sin_addr.s_addr = INADDR_ANY;
-	sa.sin_family = AF_INET;
-	sa.sin_port = htons(8080);
-	if (bind(s, (struct sockaddr *)&sa, sizeof(sa)) == -1)
-		err(1, "bind");
-
-	/* Indicate that we are a server. */
-	if (listen(s, 128) == -1)
-		err(1, "listen");
-
-	return (s);
-}
-
 int
 main(int argc, char *argv[])
 {
 	struct event	ev;
 	int		s;
 
-	s = create_socket();
+	s = perf_socket();
 
 	if (event_init() == NULL)
 		err(1, "event_init");
