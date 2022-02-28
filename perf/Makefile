@@ -5,10 +5,10 @@ CFLAGS	+= -Wstrict-prototypes -Wwrite-strings -Wno-unused-parameter
 
 BINS	 = libevent
 
-all: libevent
+all: perf.o ${BINS}
 
 clean:
-	rm -f ${BINS}
+	rm -f perf.o ${BINS}
 
 libevent: libevent.c
-	${CC} ${CFLAGS} -O2 -o $@ libevent.c -levent
+	${CC} ${CFLAGS} -O2 -o $@ perf.o libevent.c -levent
