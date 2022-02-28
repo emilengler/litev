@@ -60,14 +60,11 @@ accept_cb(int s, short condition, void *udata)
 }
 
 static void
-client_cb(int c, short condition, void *raw_ev)
+client_cb(int c, short condition, void *ev)
 {
-	struct event	*ev;
-
-	ev = raw_ev;
-
 	send(c, reply, strlen(reply), 0);
 	close(c);
+	free(ev);
 }
 
 static int
