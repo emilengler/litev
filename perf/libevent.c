@@ -28,14 +28,11 @@
 
 #include <event.h>
 
+#include "perf.h"
+
 static void	accept_cb(int, short, void *);
 static void	client_cb(int, short, void *);
 static int	create_socket(void);
-
-static const char	*reply = "HTTP/1.1 200 OK\r\n"
-				 "Content-Length: 13\r\n"
-				 "\r\n"
-				 "Hello, world!";
 
 static void
 accept_cb(int s, short condition, void *udata)
@@ -62,7 +59,7 @@ accept_cb(int s, short condition, void *udata)
 static void
 client_cb(int c, short condition, void *ev)
 {
-	send(c, reply, strlen(reply), 0);
+	send(c, PERF_REPLY, strlen(PERF_REPLY), 0);
 	close(c);
 	free(ev);
 }
