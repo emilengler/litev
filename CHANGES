@@ -1,3 +1,13 @@
+0.4 (2022-03-01)
+----------------
+External changes:
+- Fix a bug in litev_dispatch() when using poll(2).
+- Fix a memory leak in litev_close() when using kqueue(2).
+
+Internal changes:
+- Begin work on performance tests.
+- Some improvements in the readability of the epoll(2) code.
+
 0.3 (2022-02-27)
 ----------------
 External changes:
