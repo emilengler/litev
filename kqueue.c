@@ -234,19 +234,21 @@ static int
 kqueue_close(EV_API_DATA *raw_data, int fd)
 {
 	struct kqueue_data	*data;
-	struct hash		*ev_read, *ev_write;
 	struct litev_ev		 ev;
 
 	data = raw_data;
 	ev.fd = fd;
 
-	/* Fetch all events that contain fd. */
+	/* Remove all events that contain FD. */
+	/*
+	 * We do not check for the result of kqueue_del() because it may either
+	 * be LITEV_ENONET, in which case it does not matter anyway, or -1, in
+	 * which we will inevitably leak memory.
+	 */
 	ev.condition = LITEV_READ;
-	if ((ev_read = hash_lookup(data->hash, &ev)) != NULL)
-		hash_del(data->hash, ev_read);
+	kqueue_del(data, &ev);
 	ev.condition = LITEV_WRITE;
-	if ((ev_write = hash_lookup(data->hash, &ev)) != NULL)
-		hash_del(data->hash, ev_write);
+	kqueue_del(data, &ev);
 
 	/* Closing a fd removes all registered events from kqueue(2). */
 	return (close(fd) == 0 ? LITEV_OK : -1);
