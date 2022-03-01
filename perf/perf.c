@@ -25,6 +25,8 @@
 
 #include "perf.h"
 
+static const int	true = 1;
+
 int
 perf_socket(void)
 {
@@ -34,6 +36,11 @@ perf_socket(void)
 	/* Create the socket. */
 	if ((s = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		err(1, "socket");
+
+	/* Allow address reusing. */
+	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(true)) ==
+	    -1)
+		err(1, "setsockopt SO_REUSEADDR");
 
 	/* Set the socket non-blocking. */
 	if ((flags = fcntl(s, F_GETFL)) == -1)
