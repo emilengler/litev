@@ -1,5 +1,7 @@
 # litev
 
+**As of 2022-04-18, `litev` won't be continued anymore.**
+
 A minimal event notification library for C/C++.
 
 ## Disclaimer
